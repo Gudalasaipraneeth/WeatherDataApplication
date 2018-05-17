@@ -59,4 +59,26 @@ public class Location {
     public void setLongitude(Float longitude) {
         this.longitude = longitude;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Location location = (Location) o;
+
+        if (cityName != null ? !cityName.equals(location.cityName) : location.cityName != null) return false;
+        if (stateName != null ? !stateName.equals(location.stateName) : location.stateName != null) return false;
+        if (latitude != null ? !latitude.equals(location.latitude) : location.latitude != null) return false;
+        return longitude != null ? longitude.equals(location.longitude) : location.longitude == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = cityName != null ? cityName.hashCode() : 0;
+        result = 31 * result + (stateName != null ? stateName.hashCode() : 0);
+        result = 31 * result + (latitude != null ? latitude.hashCode() : 0);
+        result = 31 * result + (longitude != null ? longitude.hashCode() : 0);
+        return result;
+    }
 }

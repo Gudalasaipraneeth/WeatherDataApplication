@@ -1,5 +1,6 @@
 package com.hackerrank.weather.service;
 
+import com.hackerrank.weather.model.Weather;
 import com.hackerrank.weather.repository.WeatherRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +22,17 @@ public class DefaultWeatherServiceTest {
     private DefaultWeatherService defaultWeatherService;
 
     @Test
+    public void shouldAddAWeatherData() {
+
+        Weather weather = new Weather();
+        defaultWeatherService.create(weather);
+
+        verify(weatherRepository, times(1)).save(weather);
+        verifyNoMoreInteractions(weatherRepository);
+    }
+
+
+    @Test
     public void shouldEraseAllWeatherData() {
 
         defaultWeatherService.eraseAllWeatherData();
@@ -28,4 +40,6 @@ public class DefaultWeatherServiceTest {
         verify(weatherRepository, times(1)).deleteAll();
         verifyNoMoreInteractions(weatherRepository);
     }
+
+
 }

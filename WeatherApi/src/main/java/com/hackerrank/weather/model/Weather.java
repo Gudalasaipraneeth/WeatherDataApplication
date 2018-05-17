@@ -2,6 +2,7 @@ package com.hackerrank.weather.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Arrays;
 import java.util.Date;
 
 @Entity
@@ -70,5 +71,29 @@ public class Weather {
 
     public void setTemperature(Float[] temperature) {
         this.temperature = temperature;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Weather weather = (Weather) o;
+
+        if (id != null ? !id.equals(weather.id) : weather.id != null) return false;
+        if (dateRecorded != null ? !dateRecorded.equals(weather.dateRecorded) : weather.dateRecorded != null)
+            return false;
+        if (location != null ? !location.equals(weather.location) : weather.location != null) return false;
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        return Arrays.equals(temperature, weather.temperature);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (dateRecorded != null ? dateRecorded.hashCode() : 0);
+        result = 31 * result + (location != null ? location.hashCode() : 0);
+        result = 31 * result + Arrays.hashCode(temperature);
+        return result;
     }
 }

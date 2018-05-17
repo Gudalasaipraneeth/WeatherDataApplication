@@ -1,5 +1,6 @@
 package com.hackerrank.weather.service;
 
+import com.hackerrank.weather.model.Weather;
 import com.hackerrank.weather.repository.WeatherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,5 +18,9 @@ public class DefaultWeatherService implements WeatherService {
     @Override
     public void eraseAllWeatherData() {
         weatherRepository.deleteAll();
+    }
+
+    public Weather create(Weather weather) {
+        return weatherRepository.save(weather);
     }
 }

@@ -1,11 +1,33 @@
 package com.hackerrank.weather.model;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
+@Entity
+@Table(
+        name = "weather",
+        uniqueConstraints={ @UniqueConstraint(
+                columnNames = { "id" }
+        )
+        }
+)
 public class Weather {
+
+    @Id
     private Long id;
+
+    @Column(nullable = false)
+    @NotNull(message = "Daterecorded not be null!")
     private Date dateRecorded;
+
+    @Column(nullable = false)
+    @NotNull(message = "Location can not be null!")
+    @Embedded
     private Location location;
+
+    @Column(nullable = false)
+    @NotNull(message = "Temperate can not be null!")
     private Float[] temperature;
 
     public Weather() {

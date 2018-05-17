@@ -1,9 +1,21 @@
 package com.hackerrank.weather.model;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+
+@Embeddable
 public class Location {
+
+    @Column(name= "city")
     private String cityName;
+
+    @Column(name= "state")
     private String stateName;
+
+    @Column
     private Float latitude;
+
+    @Column
     private Float longitude;
 
     public Location() {

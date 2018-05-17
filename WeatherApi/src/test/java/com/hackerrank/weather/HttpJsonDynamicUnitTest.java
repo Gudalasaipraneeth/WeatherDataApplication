@@ -55,7 +55,6 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class})
 @WebAppConfiguration
-@Ignore
 public class HttpJsonDynamicUnitTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 

@@ -26,7 +26,7 @@ public class WeatherApiRestControllerTest {
 
     private MockMvc mockMvc;
 
-    private static final String WEATHERS_ENDPOINT = "/v1/api/weathers";
+    private static final String WEATHERS_ENDPOINT = ""; //"/v1/api/weathers";
     private static final String ERASE_ENDPOINT = WEATHERS_ENDPOINT + "/erase";
 
     @InjectMocks

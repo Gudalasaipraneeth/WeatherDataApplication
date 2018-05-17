@@ -16,7 +16,6 @@ public class DefaultWeatherService implements WeatherService {
 
     @Override
     public void eraseAllWeatherData() {
-
         weatherRepository.deleteAll();
     }
 }

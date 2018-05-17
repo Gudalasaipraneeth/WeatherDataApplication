@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class WeatherApiRestControllerIntegrationTest {
 
-    private static final String WEATHERS_ENDPOINT = "/v1/api/weathers";
+    private static final String WEATHERS_ENDPOINT = ""; //"/v1/api/weathers";
     private static final String ERASE_ENDPOINT = WEATHERS_ENDPOINT + "/erase";
 
     @Autowired

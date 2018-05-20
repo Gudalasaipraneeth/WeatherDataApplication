@@ -16,4 +16,6 @@ public interface WeatherService   {
     Weather create(Weather weather) throws DuplicateWeatherDataException;
 
     List<Weather> getAllWeatherData();
+
+    List<Weather> getAllWeatherDataForGivenLatitudeAndLongitude(Float  latitude, Float longitudde);
 }

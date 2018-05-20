@@ -68,11 +68,34 @@ public class DefaultWeatherServiceTest {
     public void shouldGetAllWeatherData() throws DuplicateWeatherDataException, ParseException {
 
         Weather expectedWeatherDO = createWeatherDO();
-        given(weatherRepository.findAll()).willReturn(Collections.singleton(expectedWeatherDO));
+        given(weatherRepository.findAll()).willReturn(Collections.singletonList(expectedWeatherDO));
 
         List<Weather> actualWeatherDO = defaultWeatherService.getAllWeatherData();
 
         verify(weatherRepository, times(1)).findAll();
+        verifyNoMoreInteractions(weatherRepository);
+
+        assertThat(actualWeatherDO).isEqualTo(Collections.singletonList(expectedWeatherDO));
+    }
+
+    @Test
+    public void shouldGetAllWeatherDataForGivenLatAndLong() throws ParseException {
+
+        Weather expectedWeatherDO = createWeatherDO();
+        Float latitude = expectedWeatherDO.getLocation().getLatitude();
+        Float longitude = expectedWeatherDO.getLocation().getLongitude();
+
+        given(weatherRepository.findWeatherDataByLatitudeAndLongitutde(latitude, longitude))
+                .willReturn(Collections.singletonList(expectedWeatherDO));
+
+
+        List<Weather> actualWeatherDO = defaultWeatherService.getAllWeatherDataForGivenLatitudeAndLongitude(
+                latitude, longitude
+        );
+
+        verify(weatherRepository, times(1))
+                .findWeatherDataByLatitudeAndLongitutde(latitude, longitude);
+
         verifyNoMoreInteractions(weatherRepository);
 
         assertThat(actualWeatherDO).isEqualTo(Collections.singletonList(expectedWeatherDO));

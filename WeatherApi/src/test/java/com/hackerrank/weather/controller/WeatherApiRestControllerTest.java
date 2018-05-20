@@ -27,9 +27,7 @@ import java.util.List;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 
@@ -81,7 +79,7 @@ public class WeatherApiRestControllerTest {
     @Test
     public void shouldEraseWeatherDataForGivenDateRangeAndLocation() throws Exception {
 
-        String startDateInString = "2018-02-11", endDateInString = "2018-02-12" ;
+        String startDateInString = "2018-02-11", endDateInString = "2018-02-12";
         Date startDate = simpleDateFormat.parse(startDateInString);
         Date endDate = simpleDateFormat.parse(endDateInString);
 
@@ -175,6 +173,36 @@ public class WeatherApiRestControllerTest {
         verifyNoMoreInteractions(weatherService);
 
     }
+
+    @Test
+    public void shouldGetAllWeatherDataForGivenLatAndLongitude() throws Exception {
+
+        Weather expectedWeather = createWeatherDO();
+        Float latitude = expectedWeather.getLocation().getLatitude();
+        Float longitude = expectedWeather.getLocation().getLongitude();
+
+        List<Weather> expectedWeatherDataList = Collections.singletonList(expectedWeather);
+        given(weatherService.getAllWeatherDataForGivenLatitudeAndLongitude(latitude, longitude))
+                .willReturn(expectedWeatherDataList);
+
+        MockHttpServletResponse getFilterWeatherDataResponse = mockMvc.perform(
+                get(WEATHERS_ENDPOINT)
+                        .param("lat", "10")
+                        .param("lon", "10"))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(getFilterWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).isNotEmpty();
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).isEqualTo(
+                weatherDOListJacksonTester.write(expectedWeatherDataList).getJson()
+        );
+
+        verify(weatherService, times(1))
+                .getAllWeatherDataForGivenLatitudeAndLongitude(latitude, longitude);
+        verifyNoMoreInteractions(weatherService);
+    }
+
     private Weather createWeatherDO() {
         Weather expectedWeather = new Weather();
         expectedWeather.setId(1L);

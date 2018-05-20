@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -50,6 +49,13 @@ public class DefaultWeatherService implements WeatherService {
     public List<Weather> getAllWeatherData() {
         Iterable<Weather> all = weatherRepository.findAll();
         return Lists.newArrayList(all);
+
+    }
+
+    @Override
+    public List<Weather> getAllWeatherDataForGivenLatitudeAndLongitude(Float latitude, Float longitude) {
+
+       return weatherRepository.findWeatherDataByLatitudeAndLongitutde(latitude, longitude);
 
     }
 }

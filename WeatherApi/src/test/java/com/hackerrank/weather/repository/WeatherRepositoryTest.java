@@ -44,6 +44,19 @@ public class WeatherRepositoryTest {
     }
 
     @Test
+    public void shouldGetWeatherDataForGivenLatitudeAndLongitude() {
+
+        Float latitude = 10f, longitude = 10f;
+
+        ArrayList<Weather> weathers = Lists.newArrayList(
+                weatherRepository.findWeatherDataByLatitudeAndLongitutde(latitude, longitude));
+
+        assertThat(weathers).isNotEmpty();
+        assertThat(weathers.size()).isEqualTo(1);
+    }
+
+
+    @Test
     public void shouldEraseAllWeatherDataFromRepository() {
         weatherRepository.deleteAll();
         Iterable<Weather> all = weatherRepository.findAll();

@@ -17,7 +17,10 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -38,6 +41,8 @@ public class WeatherApiRestControllerIntegrationTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private JacksonTester<Weather> weatherDOJacksonTester;
+    private JacksonTester<List<Weather>> weatherDOListJacksonTester;
+
 
     @Before
     public void setup() throws Exception {
@@ -73,6 +78,20 @@ public class WeatherApiRestControllerIntegrationTest {
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString()).isNotEmpty();
+    }
+
+    @Test
+    public void shouldGetAllWeatherDataForGivenLatAndLongitude() throws Exception {
+
+        MockHttpServletResponse getFilterWeatherDataResponse = mvc.perform(
+                get(WEATHERS_ENDPOINT)
+                        .param("lat", "10")
+                        .param("lon", "10"))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(getFilterWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).isNotEmpty();
     }
 
     @Test
@@ -131,6 +150,21 @@ public class WeatherApiRestControllerIntegrationTest {
         Location location = new Location("wolfsburg", "lower saxony", 10f, 10f);
         expectedWeather.setLocation(location);
         expectedWeather.setTemperature("11, 12");
+        return expectedWeather;
+    }
+
+    private Weather createWeatherDOAsInDataSqlFile() {
+        Weather expectedWeather = new Weather();
+        expectedWeather.setId(1L);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        try {
+            expectedWeather.setDateRecorded(simpleDateFormat.parse("2018-11-11"));
+        } catch (ParseException e) {
+            return null;
+        }
+        Location location = new Location("wolfsburg", "lower saxony", 10f, 10f);
+        expectedWeather.setLocation(location);
+        expectedWeather.setTemperature("12,10");
         return expectedWeather;
     }
 }

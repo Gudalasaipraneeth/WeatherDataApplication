@@ -1,5 +1,6 @@
 package com.hackerrank.weather.controller;
 
+import com.hackerrank.weather.exception.DuplicateWeatherDataException;
 import com.hackerrank.weather.model.Weather;
 import com.hackerrank.weather.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class WeatherApiRestController {
 
     @PostMapping(value = "/weather", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public Weather createWeather(@Valid @RequestBody Weather weatherData) {
+    public Weather createWeather(@Valid @RequestBody Weather weatherData) throws DuplicateWeatherDataException {
         return weatherService.create(weatherData);
     }
 

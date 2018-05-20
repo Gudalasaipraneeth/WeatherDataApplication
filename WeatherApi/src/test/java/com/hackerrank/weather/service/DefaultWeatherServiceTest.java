@@ -1,5 +1,7 @@
 package com.hackerrank.weather.service;
 
+import com.hackerrank.weather.exception.DuplicateWeatherDataException;
+import com.hackerrank.weather.model.Location;
 import com.hackerrank.weather.model.Weather;
 import com.hackerrank.weather.repository.WeatherRepository;
 import org.junit.Test;
@@ -8,9 +10,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultWeatherServiceTest {
@@ -21,16 +26,40 @@ public class DefaultWeatherServiceTest {
     @InjectMocks
     private DefaultWeatherService defaultWeatherService;
 
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+
     @Test
-    public void shouldAddAWeatherData() {
+    public void shouldAddAWeatherData() throws DuplicateWeatherDataException, ParseException {
 
-        Weather weather = new Weather();
-        defaultWeatherService.create(weather);
+        Weather weatherDO = createWeatherDO();
 
-        verify(weatherRepository, times(1)).save(weather);
+        given(weatherRepository.findOne(weatherDO.getId())).willReturn(null);
+
+        defaultWeatherService.create(weatherDO);
+
+        verify(weatherRepository, times(1)).findOne(weatherDO.getId());
+        verify(weatherRepository, times(1)).save(weatherDO);
         verifyNoMoreInteractions(weatherRepository);
     }
 
+
+    @Test
+    public void shouldThrowDuplicateWeatherDataWhenAddingPrexistingWeatherData() throws ParseException {
+
+        Weather weatherDO = createWeatherDO();
+
+        given(weatherRepository.findOne(weatherDO.getId())).willReturn(weatherDO);
+
+        try {
+            defaultWeatherService.create(weatherDO);
+
+        } catch (DuplicateWeatherDataException e) {
+
+            verify(weatherRepository, times(1)).findOne(weatherDO.getId());
+            verify(weatherRepository, never()).save(weatherDO);
+            verifyNoMoreInteractions(weatherRepository);
+        }
+    }
 
     @Test
     public void shouldEraseAllWeatherData() {
@@ -41,5 +70,27 @@ public class DefaultWeatherServiceTest {
         verifyNoMoreInteractions(weatherRepository);
     }
 
+    @Test
+    public void shouldEraseWeatherDataForAGivenDateAndGeoCordinateRagne() throws ParseException {
+
+        Date startDate = simpleDateFormat.parse("2011-08-11");
+        Date endDate = simpleDateFormat.parse("2011-08-12");
+        Float latitude = 10f, longitude = 10f;
+
+        defaultWeatherService.eraseWeatherDataForGivenDateRangeAndLocation(startDate, endDate, latitude, longitude);
+
+        verify( weatherRepository, times(1)).deleteByDateRangeForGivenLocation(startDate, endDate, latitude, longitude);
+
+        verifyNoMoreInteractions(weatherRepository);
+    }
+
+    private Weather createWeatherDO() throws ParseException {
+        Weather weatherDO = new Weather();
+        weatherDO.setDateRecorded(simpleDateFormat.parse("2018-12-12"));
+        weatherDO.setTemperature(new Float[]{12f, 13f});
+        weatherDO.setLocation(new Location("wvg", "lower saxony", 10f, 10f));
+        weatherDO.setId(12L);
+        return weatherDO;
+    }
 
 }

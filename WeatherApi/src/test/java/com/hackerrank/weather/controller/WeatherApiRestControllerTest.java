@@ -19,6 +19,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
@@ -45,6 +46,7 @@ public class WeatherApiRestControllerTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private JacksonTester<Weather> weatherDOJacksonTester;
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
 
 
     @Before
@@ -69,6 +71,29 @@ public class WeatherApiRestControllerTest {
         assertThat(mvcResponse.getContentAsString()).isEmpty();
 
         verify(weatherService, times(1)).eraseAllWeatherData();
+        verifyNoMoreInteractions(weatherService);
+    }
+
+    @Test
+    public void shouldEraseWeatherDataForGivenDateRangeAndLocation() throws Exception {
+
+        String startDateInString = "2018-02-11", endDateInString = "2018-02-12" ;
+        Date startDate = simpleDateFormat.parse(startDateInString);
+        Date endDate = simpleDateFormat.parse(endDateInString);
+
+        MockHttpServletResponse mvcResponse = mockMvc.perform(
+                delete(ERASE_ENDPOINT)
+                        .param("start", startDateInString)
+                        .param("end", endDateInString)
+                        .param("lat", "10")
+                        .param("lon", "10"))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(mvcResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(mvcResponse.getContentAsString()).isEmpty();
+
+        verify(weatherService, times(1)).eraseWeatherDataForGivenDateRangeAndLocation(startDate, endDate, 10f, 10f);
         verifyNoMoreInteractions(weatherService);
     }
 

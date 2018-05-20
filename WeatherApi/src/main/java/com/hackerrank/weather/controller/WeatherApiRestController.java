@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 @RestController
 public class WeatherApiRestController {
@@ -26,9 +28,25 @@ public class WeatherApiRestController {
         return weatherService.create(weatherData);
     }
 
-    @DeleteMapping("/erase")
+    @DeleteMapping(value = "/erase")
     @ResponseStatus(HttpStatus.OK)
     public void eraseAllWeatherInformation() {
         weatherService.eraseAllWeatherData();
     }
+
+    @DeleteMapping(value="/erase", params = {"start", "end", "lat", "lon"})
+    @ResponseStatus(HttpStatus.OK)
+    public void eraseSpecificWeatherData( @RequestParam("start") String startDate,
+                                          @RequestParam("end") String endDate,
+                                          @RequestParam("lat") float latitude,
+                                          @RequestParam("lon") float longitude
+                                         ) throws ParseException {
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+
+        weatherService.eraseWeatherDataForGivenDateRangeAndLocation( simpleDateFormat.parse(startDate),
+                simpleDateFormat.parse(endDate), latitude, longitude);
+    }
+
+
 }

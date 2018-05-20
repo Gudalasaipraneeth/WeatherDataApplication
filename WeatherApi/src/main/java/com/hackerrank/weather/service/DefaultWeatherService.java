@@ -5,6 +5,7 @@ import com.hackerrank.weather.model.Weather;
 import com.hackerrank.weather.repository.WeatherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -19,11 +20,13 @@ public class DefaultWeatherService implements WeatherService {
     }
 
     @Override
+    @Transactional
     public void eraseAllWeatherData() {
         weatherRepository.deleteAll();
     }
 
     @Override
+    @Transactional
     public void eraseWeatherDataForGivenDateRangeAndLocation(Date startDate, Date endDate, Float latitude, Float longitude) {
 
         weatherRepository.deleteByDateRangeForGivenLocation(startDate, endDate, latitude, longitude);

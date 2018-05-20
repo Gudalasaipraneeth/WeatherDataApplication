@@ -12,8 +12,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
+import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -26,7 +29,7 @@ public class DefaultWeatherServiceTest {
     @InjectMocks
     private DefaultWeatherService defaultWeatherService;
 
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
 
     @Test
     public void shouldAddAWeatherData() throws DuplicateWeatherDataException, ParseException {
@@ -62,6 +65,20 @@ public class DefaultWeatherServiceTest {
     }
 
     @Test
+    public void shouldGetAllWeatherData() throws DuplicateWeatherDataException, ParseException {
+
+        Weather expectedWeatherDO = createWeatherDO();
+        given(weatherRepository.findAll()).willReturn(Collections.singleton(expectedWeatherDO));
+
+        List<Weather> actualWeatherDO = defaultWeatherService.getAllWeatherData();
+
+        verify(weatherRepository, times(1)).findAll();
+        verifyNoMoreInteractions(weatherRepository);
+
+        assertThat(actualWeatherDO).isEqualTo(Collections.singletonList(expectedWeatherDO));
+    }
+
+    @Test
     public void shouldEraseAllWeatherData() {
 
         defaultWeatherService.eraseAllWeatherData();
@@ -87,7 +104,7 @@ public class DefaultWeatherServiceTest {
     private Weather createWeatherDO() throws ParseException {
         Weather weatherDO = new Weather();
         weatherDO.setDateRecorded(simpleDateFormat.parse("2018-12-12"));
-        weatherDO.setTemperature(new Float[]{12f, 13f});
+        weatherDO.setTemperature("12, 13");
         weatherDO.setLocation(new Location("wvg", "lower saxony", 10f, 10f));
         weatherDO.setId(12L);
         return weatherDO;

@@ -4,12 +4,13 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Table(
         name = "weather",
-        uniqueConstraints={ @UniqueConstraint(
-                columnNames = { "id" }
+        uniqueConstraints = {@UniqueConstraint(
+                columnNames = {"id"}
         )
         }
 )
@@ -18,7 +19,7 @@ public class Weather {
     @Id
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "date_recorded", nullable = false)
     @NotNull(message = "Daterecorded not be null!")
     private Date dateRecorded;
 
@@ -27,18 +28,20 @@ public class Weather {
     @Embedded
     private Location location;
 
-    @Column(nullable = false)
     @NotNull(message = "Temperate can not be null!")
-    private Float[] temperature;
+    @Column(name = "temperature_values", nullable = false)
+    private String temperature_values;
+
+    private Float[] temperature_values_in_float;
 
     public Weather() {
     }
 
-    public Weather(Long id, Date dateRecorded, Location location, Float[] temperature) {
+    public Weather(Long id, Date dateRecorded, Location location, String temperature_values) {
         this.id = id;
         this.dateRecorded = dateRecorded;
         this.location = location;
-        this.temperature = temperature;
+        this.temperature_values = temperature_values;
     }
 
     public Long getId() {
@@ -65,12 +68,19 @@ public class Weather {
         this.location = location;
     }
 
-    public Float[] getTemperature() {
-        return temperature;
+    public String getTemperature() {
+        return temperature_values;
     }
 
-    public void setTemperature(Float[] temperature) {
-        this.temperature = temperature;
+    public void setTemperature(String temperature_values) {
+        this.temperature_values = temperature_values;
+    }
+
+    public Float[] getTemperatureArray() {
+
+        String[] temperatures = temperature_values.split(",");
+
+        return Arrays.stream(temperatures).map(Float::valueOf).toArray(Float[]::new);
     }
 
     @Override
@@ -85,7 +95,7 @@ public class Weather {
             return false;
         if (location != null ? !location.equals(weather.location) : weather.location != null) return false;
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        return Arrays.equals(temperature, weather.temperature);
+        return Objects.equals(temperature_values, weather.temperature_values);
     }
 
     @Override
@@ -93,7 +103,7 @@ public class Weather {
         int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (dateRecorded != null ? dateRecorded.hashCode() : 0);
         result = 31 * result + (location != null ? location.hashCode() : 0);
-        result = 31 * result + Arrays.hashCode(temperature);
+        result = 31 * result + temperature_values.hashCode();
         return result;
     }
 }

@@ -5,6 +5,7 @@ import com.hackerrank.weather.model.Weather;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 
 public interface WeatherService   {
 
@@ -13,4 +14,6 @@ public interface WeatherService   {
     void eraseWeatherDataForGivenDateRangeAndLocation(Date startDate, Date endDate, Float latitude, Float longitude) throws ParseException;
 
     Weather create(Weather weather) throws DuplicateWeatherDataException;
+
+    List<Weather> getAllWeatherData();
 }

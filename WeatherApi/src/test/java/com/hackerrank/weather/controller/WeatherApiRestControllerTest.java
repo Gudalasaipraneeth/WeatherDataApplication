@@ -118,7 +118,7 @@ public class WeatherApiRestControllerTest {
                 weatherDOJacksonTester.write(expectedWeather).getJson()
         );
 
-        verify(weatherService, times(1)).create(expectedWeather);
+        verify(weatherService, times(1)).create(isA(Weather.class));
         verifyNoMoreInteractions(weatherService);
 
     }
@@ -142,7 +142,7 @@ public class WeatherApiRestControllerTest {
         assertThat(createWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
         assertThat(createWeatherDataResponse.getContentAsString()).isEmpty();
 
-        verify(weatherService, times(1)).create(expectedWeather);
+        verify(weatherService, times(1)).create(isA(Weather.class));
         verifyNoMoreInteractions(weatherService);
 
     }
@@ -153,7 +153,7 @@ public class WeatherApiRestControllerTest {
         expectedWeather.setDateRecorded(new Date());
         Location location = new Location("wolfsburg", "lower saxony", 10f, 10f);
         expectedWeather.setLocation(location);
-        expectedWeather.setTemperature(new Float[]{11f, 12f});
+        expectedWeather.setTemperature("11, 12");
         return expectedWeather;
     }
 }

@@ -1,5 +1,6 @@
 package com.hackerrank.weather.repository;
 
+import com.google.common.collect.Lists;
 import com.hackerrank.weather.model.Location;
 import com.hackerrank.weather.model.Weather;
 import org.junit.Test;
@@ -13,8 +14,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
+import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 
@@ -28,15 +32,22 @@ public class WeatherRepositoryTest {
     @Autowired
     private WeatherRepository weatherRepository;
 
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+
+    @Test
+    public void shouldGetAllWeatherDataFromRepository() {
+
+        ArrayList<Weather> weathers = Lists.newArrayList(weatherRepository.findAll());
+
+        assertThat(weathers).isNotEmpty();
+        assertThat(weathers.size()).isGreaterThan(0);
+    }
 
     @Test
     public void shouldEraseAllWeatherDataFromRepository() {
         weatherRepository.deleteAll();
         Iterable<Weather> all = weatherRepository.findAll();
-        all.forEach(weather -> {
-            fail();
-        });
+        all.forEach(weather -> fail());
     }
 
     @Test
@@ -49,7 +60,6 @@ public class WeatherRepositoryTest {
 
         weatherRepository.deleteByDateRangeForGivenLocation(startDate, endDate, latitude, longitude);
 
-
         Iterable<Weather> all = weatherRepository.findAll();
         all.forEach(weather -> {
 
@@ -60,8 +70,8 @@ public class WeatherRepositoryTest {
                 fail();
             }
 
-            if (currentLocation.getLatitude() == latitude &&
-                    currentLocation.getLongitude() == longitude) {
+            if (Objects.equals(currentLocation.getLatitude(), latitude) &&
+                    Objects.equals(currentLocation.getLongitude(), longitude)) {
                 fail();
             }
         });

@@ -1,18 +1,33 @@
 package com.hackerrank.weather.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackerrank.weather.Application;
+import com.hackerrank.weather.model.Location;
+import com.hackerrank.weather.model.Weather;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Date;
+
 import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,12 +37,50 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class WeatherApiRestControllerIntegrationTest {
 
-    private static final String WEATHERS_ENDPOINT = ""; //"/v1/api/weathers";
-    private static final String ERASE_ENDPOINT = WEATHERS_ENDPOINT + "/erase";
+    private static final String WEATHERS_ENDPOINT = "/weather";
+    private static final String ERASE_ENDPOINT = "/erase";
 
     @Autowired
     private MockMvc mvc;
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+    private JacksonTester<Weather> weatherDOJacksonTester;
+
+    @Before
+    public void setup() throws Exception {
+        JacksonTester.initFields(this, new ObjectMapper());
+    }
+
+    @Test
+    public void shouldCreateWeatherDataResourceForValidWeatherDataObject() throws Exception {
+
+        Weather expectedWeather = createWeatherDO();
+
+        String weatherDataAsString = mapper.writeValueAsString(expectedWeather);
+
+        MockHttpServletResponse mvcResponse = mvc.perform(
+                post(WEATHERS_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(weatherDataAsString))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(mvcResponse.getStatus()).isEqualTo(HttpStatus.CREATED.value());
+        assertThat(mvcResponse.getContentAsString()).isEqualTo(
+                weatherDOJacksonTester.write(expectedWeather).getJson()
+        );
+    }
+
+    @Test
+    public void shouldGetAllWeatherData()
+            throws Exception {
+        MockHttpServletResponse response = mvc.perform(get(WEATHERS_ENDPOINT))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isNotEmpty();
+    }
 
     @Test
     public void shouldEraseAllWeatherData()
@@ -78,4 +131,13 @@ public class WeatherApiRestControllerIntegrationTest {
     }
 
 
+    private Weather createWeatherDO() {
+        Weather expectedWeather = new Weather();
+        expectedWeather.setId(2L);
+        expectedWeather.setDateRecorded(new Date());
+        Location location = new Location("wolfsburg", "lower saxony", 10f, 10f);
+        expectedWeather.setLocation(location);
+        expectedWeather.setTemperature("11, 12");
+        return expectedWeather;
+    }
 }

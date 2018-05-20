@@ -20,12 +20,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
@@ -46,6 +49,7 @@ public class WeatherApiRestControllerTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private JacksonTester<Weather> weatherDOJacksonTester;
+    private JacksonTester<List<Weather>> weatherDOListJacksonTester;
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
 
 
@@ -147,6 +151,30 @@ public class WeatherApiRestControllerTest {
 
     }
 
+
+    @Test
+    public void shouldGetAllWeatherData() throws Exception {
+
+        Weather expectedWeather = createWeatherDO();
+
+        List<Weather> expectedWeatherDataList = Collections.singletonList(expectedWeather);
+        given(weatherService.getAllWeatherData()).willReturn(expectedWeatherDataList);
+
+        MockHttpServletResponse getAllWeatherDataResponse = mockMvc.perform(
+                get(WEATHERS_ENDPOINT))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(getAllWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(getAllWeatherDataResponse.getContentAsString()).isNotEmpty();
+        assertThat(getAllWeatherDataResponse.getContentAsString()).isEqualTo(
+                weatherDOListJacksonTester.write(expectedWeatherDataList).getJson()
+        );
+
+        verify(weatherService, times(1)).getAllWeatherData();
+        verifyNoMoreInteractions(weatherService);
+
+    }
     private Weather createWeatherDO() {
         Weather expectedWeather = new Weather();
         expectedWeather.setId(1L);

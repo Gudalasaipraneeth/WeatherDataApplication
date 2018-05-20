@@ -74,14 +74,23 @@ public class Weather {
 
     public void setTemperature(String temperature_values) {
         this.temperature_values = temperature_values;
+        this.temperature_values_in_float = getTemperatureArray(this.temperature_values);
     }
 
-    public Float[] getTemperatureArray() {
+    public Float[] getTemperatureArray(String temperature_values) {
 
         String[] temperatures = temperature_values.split(",");
 
         return Arrays.stream(temperatures).map(Float::valueOf).toArray(Float[]::new);
     }
+
+    public void setTemperature_values_in_float(Float[] temperature_values_in_float) {
+        this.temperature_values_in_float = temperature_values_in_float;
+    }
+    public Float[] getTemperature_values_in_float() {
+        return temperature_values_in_float;
+    }
+
 
     @Override
     public boolean equals(Object o) {

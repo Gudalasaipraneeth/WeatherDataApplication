@@ -13,7 +13,7 @@ public class WeatherTest {
         Weather weatherDO = new Weather();
         weatherDO.setTemperature("12,  13");
 
-        Float[] temperatureArray = weatherDO.getTemperatureArray();
+        Float[] temperatureArray = weatherDO.getTemperature_values_in_float();
 
         assertThat(temperatureArray).isNotEmpty();
         assertThat(temperatureArray.length).isEqualTo(2);

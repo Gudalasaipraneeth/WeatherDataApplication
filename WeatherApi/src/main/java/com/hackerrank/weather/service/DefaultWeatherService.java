@@ -22,6 +22,15 @@ public class DefaultWeatherService implements WeatherService {
         this.weatherRepository = weatherRepository;
     }
 
+
+    @Override
+    public Weather create(Weather weather) throws DuplicateWeatherDataException {
+
+        if (weatherRepository.findOne(weather.getId()) != null)
+            throw new DuplicateWeatherDataException();
+        return weatherRepository.save(weather);
+    }
+
     @Override
     @Transactional
     public void eraseAllWeatherData() {
@@ -30,20 +39,12 @@ public class DefaultWeatherService implements WeatherService {
 
     @Override
     @Transactional
-    public void eraseWeatherDataForGivenDateRangeAndLocation(Date startDate, Date endDate, Float latitude, Float longitude) {
+    public void eraseWeatherDataForGivenDateRangeAndLocation(Date startDate, Date endDate,
+                                                             Float latitude, Float longitude) {
 
         weatherRepository.deleteByDateRangeForGivenLocation(startDate, endDate, latitude, longitude);
     }
 
-    @Override
-    public Weather create(Weather weather) throws DuplicateWeatherDataException {
-
-        if (weatherRepository.findOne(weather.getId()) != null)
-            throw new DuplicateWeatherDataException();
-
-        return weatherRepository.save(weather);
-
-    }
 
     @Override
     public List<Weather> getAllWeatherData() {

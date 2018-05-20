@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 @RestController
 public class WeatherApiRestController {
@@ -26,6 +27,12 @@ public class WeatherApiRestController {
     @ResponseStatus(HttpStatus.CREATED)
     public Weather createWeather(@Valid @RequestBody Weather weatherData) throws DuplicateWeatherDataException {
         return weatherService.create(weatherData);
+    }
+
+    @GetMapping(value = "/weather", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public List<Weather> getAllWeatherData() {
+        return weatherService.getAllWeatherData();
     }
 
     @DeleteMapping(value = "/erase")

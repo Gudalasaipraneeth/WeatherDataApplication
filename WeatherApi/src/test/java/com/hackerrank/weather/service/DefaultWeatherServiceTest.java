@@ -1,6 +1,7 @@
 package com.hackerrank.weather.service;
 
 import com.hackerrank.weather.exception.DuplicateWeatherDataException;
+import com.hackerrank.weather.exception.WeatherDataNotFoundException;
 import com.hackerrank.weather.model.Location;
 import com.hackerrank.weather.model.Weather;
 import com.hackerrank.weather.repository.WeatherRepository;
@@ -79,7 +80,7 @@ public class DefaultWeatherServiceTest {
     }
 
     @Test
-    public void shouldGetAllWeatherDataForGivenLatAndLong() throws ParseException {
+    public void shouldGetAllWeatherDataForGivenLatAndLong() throws ParseException, WeatherDataNotFoundException {
 
         Weather expectedWeatherDO = createWeatherDO();
         Float latitude = expectedWeatherDO.getLocation().getLatitude();

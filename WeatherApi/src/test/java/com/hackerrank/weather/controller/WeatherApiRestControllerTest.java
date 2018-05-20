@@ -2,6 +2,7 @@ package com.hackerrank.weather.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackerrank.weather.exception.DuplicateWeatherDataException;
+import com.hackerrank.weather.exception.WeatherDataNotFoundException;
 import com.hackerrank.weather.model.Location;
 import com.hackerrank.weather.model.Weather;
 import com.hackerrank.weather.service.WeatherService;
@@ -197,6 +198,31 @@ public class WeatherApiRestControllerTest {
         assertThat(getFilterWeatherDataResponse.getContentAsString()).isEqualTo(
                 weatherDOListJacksonTester.write(expectedWeatherDataList).getJson()
         );
+
+        verify(weatherService, times(1))
+                .getAllWeatherDataForGivenLatitudeAndLongitude(latitude, longitude);
+        verifyNoMoreInteractions(weatherService);
+    }
+
+    @Test
+    public void shouldReturn404IfThereAreNoWeatherDataForGivenLatAndLongitude() throws Exception {
+
+        Weather expectedWeather = createWeatherDO();
+        Float latitude = expectedWeather.getLocation().getLatitude();
+        Float longitude = expectedWeather.getLocation().getLongitude();
+
+        given(weatherService.getAllWeatherDataForGivenLatitudeAndLongitude(latitude, longitude))
+                .willThrow(WeatherDataNotFoundException.class);
+
+        MockHttpServletResponse getFilterWeatherDataResponse = mockMvc.perform(
+                get(WEATHERS_ENDPOINT)
+                        .param("lat", "10")
+                        .param("lon", "10"))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(getFilterWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).isEmpty();
 
         verify(weatherService, times(1))
                 .getAllWeatherDataForGivenLatitudeAndLongitude(latitude, longitude);

@@ -1,6 +1,7 @@
 package com.hackerrank.weather.service;
 
 import com.hackerrank.weather.exception.DuplicateWeatherDataException;
+import com.hackerrank.weather.exception.WeatherDataNotFoundException;
 import com.hackerrank.weather.model.Weather;
 
 import java.text.ParseException;
@@ -17,5 +18,6 @@ public interface WeatherService   {
 
     List<Weather> getAllWeatherData();
 
-    List<Weather> getAllWeatherDataForGivenLatitudeAndLongitude(Float  latitude, Float longitudde);
+    List<Weather> getAllWeatherDataForGivenLatitudeAndLongitude(Float  latitude, Float longitudde)
+            throws WeatherDataNotFoundException;
 }

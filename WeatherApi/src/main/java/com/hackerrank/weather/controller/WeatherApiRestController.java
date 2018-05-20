@@ -1,6 +1,7 @@
 package com.hackerrank.weather.controller;
 
 import com.hackerrank.weather.exception.DuplicateWeatherDataException;
+import com.hackerrank.weather.exception.WeatherDataNotFoundException;
 import com.hackerrank.weather.model.Weather;
 import com.hackerrank.weather.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,25 +25,26 @@ public class WeatherApiRestController {
     }
 
     @PostMapping(value = "/weather",
-                produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public Weather createWeather(@Valid @RequestBody Weather weatherData) throws DuplicateWeatherDataException {
         return weatherService.create(weatherData);
     }
 
     @GetMapping(value = "/weather",
-                produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<Weather> getAllWeatherData() {
         return weatherService.getAllWeatherData();
     }
 
     @GetMapping(value = "/weather",
-                params = {"lat", "lon"},
-                produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+            params = {"lat", "lon"},
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public List<Weather> getAllWeatherDataForGivenLatitudeAndLongitude( @Valid @RequestParam("lat") float latitude,
-                                                                        @Valid @RequestParam("lon") float longitude) {
+    public List<Weather> getAllWeatherDataForGivenLatitudeAndLongitude(
+            @Valid @RequestParam("lat") float latitude,
+            @Valid @RequestParam("lon") float longitude) throws WeatherDataNotFoundException {
         return weatherService.getAllWeatherDataForGivenLatitudeAndLongitude(latitude, longitude);
     }
 
@@ -52,17 +54,17 @@ public class WeatherApiRestController {
         weatherService.eraseAllWeatherData();
     }
 
-    @DeleteMapping(value="/erase", params = {"start", "end", "lat", "lon"})
+    @DeleteMapping(value = "/erase", params = {"start", "end", "lat", "lon"})
     @ResponseStatus(HttpStatus.OK)
-    public void eraseSpecificWeatherData( @Valid @RequestParam("start") String startDate,
-                                          @Valid @RequestParam("end") String endDate,
-                                          @Valid @RequestParam("lat") float latitude,
-                                          @Valid @RequestParam("lon") float longitude
-                                         ) throws ParseException {
+    public void eraseSpecificWeatherData(@Valid @RequestParam("start") String startDate,
+                                         @Valid @RequestParam("end") String endDate,
+                                         @Valid @RequestParam("lat") float latitude,
+                                         @Valid @RequestParam("lon") float longitude
+    ) throws ParseException {
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
 
-        weatherService.eraseWeatherDataForGivenDateRangeAndLocation( simpleDateFormat.parse(startDate),
+        weatherService.eraseWeatherDataForGivenDateRangeAndLocation(simpleDateFormat.parse(startDate),
                 simpleDateFormat.parse(endDate), latitude, longitude);
     }
 

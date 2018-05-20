@@ -2,6 +2,7 @@ package com.hackerrank.weather.service;
 
 import com.google.common.collect.Lists;
 import com.hackerrank.weather.exception.DuplicateWeatherDataException;
+import com.hackerrank.weather.exception.WeatherDataNotFoundException;
 import com.hackerrank.weather.model.Weather;
 import com.hackerrank.weather.repository.WeatherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +54,13 @@ public class DefaultWeatherService implements WeatherService {
     }
 
     @Override
-    public List<Weather> getAllWeatherDataForGivenLatitudeAndLongitude(Float latitude, Float longitude) {
+    public List<Weather> getAllWeatherDataForGivenLatitudeAndLongitude(Float latitude, Float longitude) throws WeatherDataNotFoundException {
 
-       return weatherRepository.findWeatherDataByLatitudeAndLongitutde(latitude, longitude);
+        List<Weather> weatherDataByLatitudeAndLongitutde = weatherRepository.findWeatherDataByLatitudeAndLongitutde(latitude, longitude);
 
+        if ( weatherDataByLatitudeAndLongitutde.isEmpty())
+            throw new WeatherDataNotFoundException();
+
+        return weatherDataByLatitudeAndLongitutde;
     }
 }

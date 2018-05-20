@@ -94,6 +94,21 @@ public class WeatherApiRestControllerIntegrationTest {
         assertThat(getFilterWeatherDataResponse.getContentAsString()).isNotEmpty();
     }
 
+
+    @Test
+    public void shouldReturn404WhenNoWeatherDataForGivenLatAndLongitudeIsFound() throws Exception {
+
+        MockHttpServletResponse getFilterWeatherDataResponse = mvc.perform(
+                get(WEATHERS_ENDPOINT)
+                        .param("lat", "999")
+                        .param("lon", "10000"))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(getFilterWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).isEmpty();
+    }
+
     @Test
     public void shouldEraseAllWeatherData()
             throws Exception {

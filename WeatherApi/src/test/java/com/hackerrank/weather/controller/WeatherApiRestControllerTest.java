@@ -1,6 +1,7 @@
 package com.hackerrank.weather.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hackerrank.weather.exception.DuplicateWeatherDataException;
 import com.hackerrank.weather.model.Location;
 import com.hackerrank.weather.model.Weather;
 import com.hackerrank.weather.service.WeatherService;
@@ -43,7 +44,7 @@ public class WeatherApiRestControllerTest {
     private WeatherService weatherService;
 
     private static final ObjectMapper mapper = new ObjectMapper();
-    private JacksonTester<Weather> carDTOJacksonTester;
+    private JacksonTester<Weather> weatherDOJacksonTester;
 
 
     @Before
@@ -74,12 +75,7 @@ public class WeatherApiRestControllerTest {
     @Test
     public void shouldCreateWeatherDataResourceForValidWeatherDataObject() throws Exception {
 
-        Weather expectedWeather = new Weather();
-        expectedWeather.setId(1L);
-        expectedWeather.setDateRecorded(new Date());
-        Location location = new Location("wolfsburg", "lower saxony", 10f, 10f);
-        expectedWeather.setLocation(location);
-        expectedWeather.setTemperature(new Float[]{11f, 12f});
+        Weather expectedWeather = createWeatherDO();
 
         given(weatherService.create(isA(Weather.class))).willReturn(expectedWeather);
 
@@ -94,11 +90,45 @@ public class WeatherApiRestControllerTest {
 
         assertThat(mvcResponse.getStatus()).isEqualTo(HttpStatus.CREATED.value());
         assertThat(mvcResponse.getContentAsString()).isEqualTo(
-                carDTOJacksonTester.write(expectedWeather).getJson()
+                weatherDOJacksonTester.write(expectedWeather).getJson()
         );
 
         verify(weatherService, times(1)).create(expectedWeather);
         verifyNoMoreInteractions(weatherService);
 
+    }
+
+    @Test
+    public void shouldNotCreateWeatherDataResourceForDuplicateWeatherDataObjectAndReturn400StatusCode() throws Exception {
+
+        Weather expectedWeather = createWeatherDO();
+
+        given(weatherService.create(isA(Weather.class))).willThrow(DuplicateWeatherDataException.class);
+
+        String weatherDataAsString = mapper.writeValueAsString(expectedWeather);
+
+        MockHttpServletResponse createWeatherDataResponse = mockMvc.perform(
+                post(WEATHERS_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(weatherDataAsString))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(createWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(createWeatherDataResponse.getContentAsString()).isEmpty();
+
+        verify(weatherService, times(1)).create(expectedWeather);
+        verifyNoMoreInteractions(weatherService);
+
+    }
+
+    private Weather createWeatherDO() {
+        Weather expectedWeather = new Weather();
+        expectedWeather.setId(1L);
+        expectedWeather.setDateRecorded(new Date());
+        Location location = new Location("wolfsburg", "lower saxony", 10f, 10f);
+        expectedWeather.setLocation(location);
+        expectedWeather.setTemperature(new Float[]{11f, 12f});
+        return expectedWeather;
     }
 }

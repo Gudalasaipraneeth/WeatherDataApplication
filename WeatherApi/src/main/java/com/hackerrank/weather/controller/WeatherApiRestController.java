@@ -36,10 +36,10 @@ public class WeatherApiRestController {
 
     @DeleteMapping(value="/erase", params = {"start", "end", "lat", "lon"})
     @ResponseStatus(HttpStatus.OK)
-    public void eraseSpecificWeatherData( @RequestParam("start") String startDate,
-                                          @RequestParam("end") String endDate,
-                                          @RequestParam("lat") float latitude,
-                                          @RequestParam("lon") float longitude
+    public void eraseSpecificWeatherData( @Valid @RequestParam("start") String startDate,
+                                          @Valid @RequestParam("end") String endDate,
+                                          @Valid @RequestParam("lat") float latitude,
+                                          @Valid @RequestParam("lon") float longitude
                                          ) throws ParseException {
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");

@@ -88,7 +88,7 @@ public class Weather {
         this.temperature_values_in_float = temperature_values_in_float;
     }
     public Float[] getTemperature_values_in_float() {
-        return temperature_values_in_float;
+        return getTemperatureArray(this.temperature_values);
     }
 
 

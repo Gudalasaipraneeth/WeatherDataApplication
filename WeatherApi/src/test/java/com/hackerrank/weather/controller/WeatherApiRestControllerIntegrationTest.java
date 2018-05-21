@@ -96,20 +96,6 @@ public class WeatherApiRestControllerIntegrationTest {
     }
 
     @Test
-    public void shouldGetAllWeatherDataForGivenDateRange() throws Exception {
-
-        MockHttpServletResponse getFilterWeatherDataResponse = mvc.perform(
-                get(WEATHERS_ENDPOINT)
-                        .param("start", "2011-01-01")
-                        .param("end", "2020-01-11"))
-                .andDo(print())
-                .andReturn().getResponse();
-
-        assertThat(getFilterWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(getFilterWeatherDataResponse.getContentAsString()).isNotEmpty();
-    }
-
-    @Test
     public void shouldReturn404WhenNoWeatherDataForGivenLatAndLongitudeIsFound() throws Exception {
 
         MockHttpServletResponse getFilterWeatherDataResponse = mvc.perform(
@@ -150,6 +136,23 @@ public class WeatherApiRestControllerIntegrationTest {
 
         assertThat(mvcResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(mvcResponse.getContentAsString()).isEmpty();
+    }
+
+    @Test
+    public void shouldGetAllWeatherDataForGivenDateRange() throws Exception {
+
+        String startDateInString = "2001-02-11", endDateInString = "2020-02-12";
+
+        MockHttpServletResponse getFilterWeatherDataResponse = mvc.perform(
+                get(WEATHERS_ENDPOINT + TEMPERATURES_ENDPOINT)
+                        .param("start", startDateInString)
+                        .param("end", endDateInString))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(getFilterWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).isNotEmpty();
+
     }
 
     @Test

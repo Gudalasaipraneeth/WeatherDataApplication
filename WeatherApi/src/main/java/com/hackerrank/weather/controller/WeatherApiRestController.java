@@ -1,5 +1,6 @@
 package com.hackerrank.weather.controller;
 
+import com.hackerrank.weather.dto.WeatherStats;
 import com.hackerrank.weather.exception.DuplicateWeatherDataException;
 import com.hackerrank.weather.exception.WeatherDataNotFoundException;
 import com.hackerrank.weather.model.Weather;
@@ -24,23 +25,24 @@ public class WeatherApiRestController {
         this.weatherService = weatherService;
     }
 
-    @PostMapping(value = "/weather",
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+
+    @PostMapping(value = "/weather", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public Weather createWeather(@Valid @RequestBody Weather weatherData) throws DuplicateWeatherDataException {
         return weatherService.create(weatherData);
     }
 
-    @GetMapping(value = "/weather",
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+
+    @GetMapping(value = "/weather", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<Weather> getAllWeatherData() {
         return weatherService.getAllWeatherData();
     }
 
+
     @GetMapping(value = "/weather",
-            params = {"lat", "lon"},
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+                params = {"lat", "lon"},
+                produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<Weather> getAllWeatherDataForGivenLatitudeAndLongitude(
             @Valid @RequestParam("lat") float latitude,
@@ -49,21 +51,26 @@ public class WeatherApiRestController {
     }
 
     @GetMapping(value = "/weather/temperature",
-            params = {"start", "end"},
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+                params = {"start", "end"},
+                produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public List<Weather> getAllWeatherDataForGivenDateRange(
+    public List<WeatherStats> getAllWeatherDataForGivenDateRange(
             @Valid @RequestParam("start") String startDate,
             @Valid @RequestParam("end") String endDate) throws ParseException {
+
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
-        return weatherService.getAllWeatherDataForGivenDateRange(simpleDateFormat.parse(startDate), simpleDateFormat.parse(endDate));
+
+        return weatherService.getAllWeatherDataForGivenDateRange(simpleDateFormat.parse(startDate),
+                simpleDateFormat.parse(endDate));
     }
+
 
     @DeleteMapping(value = "/erase")
     @ResponseStatus(HttpStatus.OK)
     public void eraseAllWeatherInformation() {
         weatherService.eraseAllWeatherData();
     }
+
 
     @DeleteMapping(value = "/erase", params = {"start", "end", "lat", "lon"})
     @ResponseStatus(HttpStatus.OK)
@@ -78,6 +85,5 @@ public class WeatherApiRestController {
         weatherService.eraseWeatherDataForGivenDateRangeAndLocation(simpleDateFormat.parse(startDate),
                 simpleDateFormat.parse(endDate), latitude, longitude);
     }
-
 
 }

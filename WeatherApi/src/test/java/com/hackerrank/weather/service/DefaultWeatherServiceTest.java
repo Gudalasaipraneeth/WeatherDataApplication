@@ -103,6 +103,29 @@ public class DefaultWeatherServiceTest {
     }
 
     @Test
+    public void shouldGetAllWeatherDataForGivenDateRange() throws ParseException, WeatherDataNotFoundException {
+
+        Weather expectedWeatherDO = createWeatherDO();
+        Date startDate = simpleDateFormat.parse("2011-08-11");
+        Date endDate = simpleDateFormat.parse("2011-08-12");
+
+        given(weatherRepository.findWeatherDataForGivenDateRange(startDate, endDate))
+                .willReturn(Collections.singletonList(expectedWeatherDO));
+
+
+        List<Weather> actualWeatherDO = defaultWeatherService.getAllWeatherDataForGivenDateRange(
+                startDate, endDate
+        );
+
+        verify(weatherRepository, times(1))
+                .findWeatherDataForGivenDateRange(startDate, endDate);
+
+        verifyNoMoreInteractions(weatherRepository);
+
+        assertThat(actualWeatherDO).isEqualTo(Collections.singletonList(expectedWeatherDO));
+    }
+
+    @Test
     public void shouldEraseAllWeatherData() {
 
         defaultWeatherService.eraseAllWeatherData();

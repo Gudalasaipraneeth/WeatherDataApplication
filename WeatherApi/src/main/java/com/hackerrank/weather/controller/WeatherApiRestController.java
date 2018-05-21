@@ -48,6 +48,17 @@ public class WeatherApiRestController {
         return weatherService.getAllWeatherDataForGivenLatitudeAndLongitude(latitude, longitude);
     }
 
+    @GetMapping(value = "/weather/temperature",
+            params = {"start", "end"},
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public List<Weather> getAllWeatherDataForGivenDateRange(
+            @Valid @RequestParam("start") String startDate,
+            @Valid @RequestParam("end") String endDate) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        return weatherService.getAllWeatherDataForGivenDateRange(simpleDateFormat.parse(startDate), simpleDateFormat.parse(endDate));
+    }
+
     @DeleteMapping(value = "/erase")
     @ResponseStatus(HttpStatus.OK)
     public void eraseAllWeatherInformation() {

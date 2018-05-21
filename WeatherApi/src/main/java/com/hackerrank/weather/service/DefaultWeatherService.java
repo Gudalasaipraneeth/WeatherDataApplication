@@ -58,9 +58,14 @@ public class DefaultWeatherService implements WeatherService {
 
         List<Weather> weatherDataByLatitudeAndLongitutde = weatherRepository.findWeatherDataByLatitudeAndLongitutde(latitude, longitude);
 
-        if ( weatherDataByLatitudeAndLongitutde.isEmpty())
+        if (weatherDataByLatitudeAndLongitutde.isEmpty())
             throw new WeatherDataNotFoundException();
 
         return weatherDataByLatitudeAndLongitutde;
+    }
+
+    @Override
+    public List<Weather> getAllWeatherDataForGivenDateRange(Date startDate, Date endDate) {
+        return weatherRepository.findWeatherDataForGivenDateRange(startDate, endDate);
     }
 }

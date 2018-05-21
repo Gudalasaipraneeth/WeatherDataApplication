@@ -20,4 +20,6 @@ public interface WeatherService   {
 
     List<Weather> getAllWeatherDataForGivenLatitudeAndLongitude(Float  latitude, Float longitudde)
             throws WeatherDataNotFoundException;
+
+    List<Weather> getAllWeatherDataForGivenDateRange(Date startDate, Date endDate);
 }

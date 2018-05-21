@@ -28,4 +28,8 @@ public interface WeatherRepository extends CrudRepository<Weather, Long> {
             "   (w.location.longitude    = ?2)")
     List<Weather> findWeatherDataByLatitudeAndLongitutde(final float latitude, final float longitude);
 
+    @Query("select w FROM Weather w " +
+            "   where " +
+            "   w.dateRecorded BETWEEN ?1 AND ?2")
+    List<Weather> findWeatherDataForGivenDateRange(final Date startDate, final Date endDate);
 }

@@ -38,6 +38,7 @@ public class WeatherApiRestControllerTest {
     private MockMvc mockMvc;
 
     private static final String WEATHERS_ENDPOINT = "/weather"; //"/v1/api/weathers";
+    private static final String TEMPERATURES_ENDPOINT = "/temperature"; //"/v1/api/weathers";
     private static final String ERASE_ENDPOINT = "/erase";
 
     @InjectMocks
@@ -226,6 +227,37 @@ public class WeatherApiRestControllerTest {
 
         verify(weatherService, times(1))
                 .getAllWeatherDataForGivenLatitudeAndLongitude(latitude, longitude);
+        verifyNoMoreInteractions(weatherService);
+    }
+
+    @Test
+    public void shouldGetAllWeatherDataForGivenDateRange() throws Exception {
+
+        Weather expectedWeather = createWeatherDO();
+
+        String startDateInString = "2018-02-11", endDateInString = "2018-02-12";
+        Date startDate = simpleDateFormat.parse(startDateInString);
+        Date endDate = simpleDateFormat.parse(endDateInString);
+
+        List<Weather> expectedWeatherDataList = Collections.singletonList(expectedWeather);
+        given(weatherService.getAllWeatherDataForGivenDateRange(startDate, endDate))
+                .willReturn(expectedWeatherDataList);
+
+        MockHttpServletResponse getFilterWeatherDataResponse = mockMvc.perform(
+                get(WEATHERS_ENDPOINT + TEMPERATURES_ENDPOINT)
+                        .param("start", startDateInString)
+                        .param("end", endDateInString))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(getFilterWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).isNotEmpty();
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).isEqualTo(
+                weatherDOListJacksonTester.write(expectedWeatherDataList).getJson()
+        );
+
+        verify(weatherService, times(1))
+                .getAllWeatherDataForGivenDateRange(startDate, endDate);
         verifyNoMoreInteractions(weatherService);
     }
 

@@ -35,6 +35,7 @@ public class WeatherApiRestControllerIntegrationTest {
 
     private static final String WEATHERS_ENDPOINT = "/weather";
     private static final String ERASE_ENDPOINT = "/erase";
+    private static final String TEMPERATURES_ENDPOINT = "/temperature";
 
     @Autowired
     private MockMvc mvc;
@@ -94,6 +95,19 @@ public class WeatherApiRestControllerIntegrationTest {
         assertThat(getFilterWeatherDataResponse.getContentAsString()).isNotEmpty();
     }
 
+    @Test
+    public void shouldGetAllWeatherDataForGivenDateRange() throws Exception {
+
+        MockHttpServletResponse getFilterWeatherDataResponse = mvc.perform(
+                get(WEATHERS_ENDPOINT)
+                        .param("start", "2011-01-01")
+                        .param("end", "2020-01-11"))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(getFilterWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).isNotEmpty();
+    }
 
     @Test
     public void shouldReturn404WhenNoWeatherDataForGivenLatAndLongitudeIsFound() throws Exception {
@@ -137,7 +151,6 @@ public class WeatherApiRestControllerIntegrationTest {
         assertThat(mvcResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(mvcResponse.getContentAsString()).isEmpty();
     }
-
 
     @Test
     public void shouldReturn400WhenInvalidDateFormatsAreGivenForErasingWeatherData() throws Exception {

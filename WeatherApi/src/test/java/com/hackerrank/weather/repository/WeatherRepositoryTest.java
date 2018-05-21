@@ -55,6 +55,16 @@ public class WeatherRepositoryTest {
         assertThat(weathers.size()).isEqualTo(1);
     }
 
+    @Test
+    public void shouldGetWeatherDataForGivenDateRange() throws ParseException {
+        Date startDate = simpleDateFormat.parse("2001-01-01");
+        Date endDate = simpleDateFormat.parse("2020-11-11");
+        ArrayList<Weather> weathers = Lists.newArrayList(
+                weatherRepository.findWeatherDataForGivenDateRange(startDate, endDate));
+
+        assertThat(weathers).isNotEmpty();
+        assertThat(weathers.size()).isEqualTo(2);
+    }
 
     @Test
     public void shouldEraseAllWeatherDataFromRepository() {

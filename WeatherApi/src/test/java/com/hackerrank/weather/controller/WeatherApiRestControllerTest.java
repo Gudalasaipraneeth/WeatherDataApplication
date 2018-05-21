@@ -1,11 +1,14 @@
 package com.hackerrank.weather.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hackerrank.weather.dto.WeatherStats;
 import com.hackerrank.weather.exception.DuplicateWeatherDataException;
 import com.hackerrank.weather.exception.WeatherDataNotFoundException;
+import com.hackerrank.weather.model.Constants;
 import com.hackerrank.weather.model.Location;
 import com.hackerrank.weather.model.Weather;
 import com.hackerrank.weather.service.WeatherService;
+import io.vavr.control.Either;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,9 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -50,6 +51,7 @@ public class WeatherApiRestControllerTest {
     private static final ObjectMapper mapper = new ObjectMapper();
     private JacksonTester<Weather> weatherDOJacksonTester;
     private JacksonTester<List<Weather>> weatherDOListJacksonTester;
+    private JacksonTester<List<WeatherStats>> weatherStatsListJacksonTester;
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
 
 
@@ -153,7 +155,7 @@ public class WeatherApiRestControllerTest {
 
 
     @Test
-    public void shouldGetAllWeatherData() throws Exception {
+    public void shouldGetAllWeatherDataWhenDataIsPresent() throws Exception {
 
         Weather expectedWeather = createWeatherDO();
 
@@ -175,6 +177,7 @@ public class WeatherApiRestControllerTest {
         verifyNoMoreInteractions(weatherService);
 
     }
+
 
     @Test
     public void shouldGetAllWeatherDataForGivenLatAndLongitude() throws Exception {
@@ -239,9 +242,18 @@ public class WeatherApiRestControllerTest {
         Date startDate = simpleDateFormat.parse(startDateInString);
         Date endDate = simpleDateFormat.parse(endDateInString);
 
-        List<Weather> expectedWeatherDataList = Collections.singletonList(expectedWeather);
+        List<WeatherStats> weatherStatsList = new ArrayList<>();
+
+        DoubleSummaryStatistics temperatureSummaryStatistics = new DoubleSummaryStatistics();
+        temperatureSummaryStatistics.accept(11f);
+        temperatureSummaryStatistics.accept(12f);
+
+        WeatherStats e = new WeatherStats(expectedWeather.getLocation(), Either.left(temperatureSummaryStatistics));
+        weatherStatsList.add(e);
+
+
         given(weatherService.getAllWeatherDataForGivenDateRange(startDate, endDate))
-                .willReturn(expectedWeatherDataList);
+                .willReturn( weatherStatsList);
 
         MockHttpServletResponse getFilterWeatherDataResponse = mockMvc.perform(
                 get(WEATHERS_ENDPOINT + TEMPERATURES_ENDPOINT)
@@ -253,7 +265,42 @@ public class WeatherApiRestControllerTest {
         assertThat(getFilterWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(getFilterWeatherDataResponse.getContentAsString()).isNotEmpty();
         assertThat(getFilterWeatherDataResponse.getContentAsString()).isEqualTo(
-                weatherDOListJacksonTester.write(expectedWeatherDataList).getJson()
+                weatherStatsListJacksonTester.write(weatherStatsList).getJson()
+        );
+
+        verify(weatherService, times(1))
+                .getAllWeatherDataForGivenDateRange(startDate, endDate);
+        verifyNoMoreInteractions(weatherService);
+    }
+
+    @Test
+    public void shouldGetWeatherStatsWithFailureMessageWhenNoDataForGivenDateRange() throws Exception {
+
+        Weather expectedWeather = createWeatherDO();
+
+        String startDateInString = "2018-02-11", endDateInString = "2018-02-12";
+        Date startDate = simpleDateFormat.parse(startDateInString);
+        Date endDate = simpleDateFormat.parse(endDateInString);
+
+        List<WeatherStats> weatherStatsList = new ArrayList<>();
+
+        WeatherStats e = new WeatherStats(expectedWeather.getLocation(), Either.right(Constants.NO_DATA_FOR_GIVEN_DATE_RANGE));
+        weatherStatsList.add(e);
+
+        given(weatherService.getAllWeatherDataForGivenDateRange(startDate, endDate))
+                .willReturn( weatherStatsList);
+
+        MockHttpServletResponse getFilterWeatherDataResponse = mockMvc.perform(
+                get(WEATHERS_ENDPOINT + TEMPERATURES_ENDPOINT)
+                        .param("start", startDateInString)
+                        .param("end", endDateInString))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(getFilterWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).isNotEmpty();
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).isEqualTo(
+                weatherStatsListJacksonTester.write(weatherStatsList).getJson()
         );
 
         verify(weatherService, times(1))

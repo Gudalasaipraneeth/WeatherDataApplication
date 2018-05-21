@@ -1,5 +1,7 @@
 package com.hackerrank.weather.service;
 
+import com.google.common.collect.Lists;
+import com.hackerrank.weather.dto.WeatherStats;
 import com.hackerrank.weather.exception.DuplicateWeatherDataException;
 import com.hackerrank.weather.exception.WeatherDataNotFoundException;
 import com.hackerrank.weather.model.Location;
@@ -113,18 +115,59 @@ public class DefaultWeatherServiceTest {
                 .willReturn(Collections.singletonList(expectedWeatherDO));
 
 
-        List<Weather> actualWeatherDO = defaultWeatherService.getAllWeatherDataForGivenDateRange(
+        List<WeatherStats> actualWeatherStatsList = defaultWeatherService.getAllWeatherDataForGivenDateRange(
                 startDate, endDate
         );
-
         verify(weatherRepository, times(1))
                 .findWeatherDataForGivenDateRange(startDate, endDate);
 
         verifyNoMoreInteractions(weatherRepository);
 
-        assertThat(actualWeatherDO).isEqualTo(Collections.singletonList(expectedWeatherDO));
+        assertThat(actualWeatherStatsList.size()).isEqualTo(1);
+        assertThat(actualWeatherStatsList.get(0).getLocation().getCityName()).isEqualTo("wvg");
+        assertThat(actualWeatherStatsList.get(0).getLocation().getStateName()).isEqualTo("lower saxony");
+        assertThat(actualWeatherStatsList.get(0).getLocation().getLatitude()).isEqualTo(10);
+        assertThat(actualWeatherStatsList.get(0).getLocation().getLongitude()).isEqualTo(10);
+        assertThat(actualWeatherStatsList.get(0).getTemperatureSummaryStatistics()).isNotNull();
+        assertThat(actualWeatherStatsList.get(0).getTemperatureStats().getMax()).isEqualTo(13);
+        assertThat(actualWeatherStatsList.get(0).getTemperatureStats().getMin()).isEqualTo(12);
     }
 
+    @Test
+    public void shouldCreateSummaryStatistics() throws ParseException {
+
+        Weather weatherDO = createWeatherDO();
+        Weather weatherDO2 = createWeatherDO();
+        Weather weatherDO3 = createWeatherDOForCity("dusseldorf");
+        List<Weather> weatherList = Lists.newArrayList(weatherDO, weatherDO2, weatherDO3);
+
+        List<WeatherStats> weatherStats = defaultWeatherService.getWeatherStats(weatherList);
+
+        assertThat(weatherStats).isNotEmpty();
+
+        weatherList.sort((weatherData1, weatherData2) -> (weatherData1
+                .getLocation()
+                .getCityName()
+                .compareTo(weatherData2.getLocation().getCityName())));
+        assertThat(weatherStats.size()).isEqualTo(2);
+        assertThat(weatherStats.get(0).getLocation().getCityName()).isEqualTo("dusseldorf");
+        assertThat(weatherStats.get(0).getTemperatureStats().getMin()).isEqualTo(12.0f);
+        assertThat(weatherStats.get(0).getTemperatureStats().getMax()).isEqualTo(14.0f);
+    }
+
+
+    @Test
+    public void shouldCreateSummaryStatisticsWithFailureMessageWhenNoDataIsPresent() throws ParseException {
+
+        List<Weather> weatherList = Collections.emptyList();
+
+        List<WeatherStats> weatherStats = defaultWeatherService.getWeatherStats(weatherList);
+
+        assertThat(weatherStats).isNotEmpty();
+
+        assertThat(weatherStats.size()).isEqualTo(1);
+        assertThat(weatherStats.get(0).getFailureMessage()).isEqualTo("There is no weather data in the given date range");
+    }
     @Test
     public void shouldEraseAllWeatherData() {
 
@@ -157,4 +200,12 @@ public class DefaultWeatherServiceTest {
         return weatherDO;
     }
 
+    private Weather createWeatherDOForCity(String cityName) throws ParseException {
+        Weather weatherDO = new Weather();
+        weatherDO.setDateRecorded(simpleDateFormat.parse("2018-12-12"));
+        weatherDO.setTemperature("12, 13, 14");
+        weatherDO.setLocation(new Location(cityName, "lower saxony", 10f, 10f));
+        weatherDO.setId(12L);
+        return weatherDO;
+    }
 }

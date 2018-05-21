@@ -2,6 +2,7 @@ package com.hackerrank.weather.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackerrank.weather.Application;
+import com.hackerrank.weather.model.Constants;
 import com.hackerrank.weather.model.Location;
 import com.hackerrank.weather.model.Weather;
 import org.junit.Before;
@@ -152,7 +153,23 @@ public class WeatherApiRestControllerIntegrationTest {
 
         assertThat(getFilterWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(getFilterWeatherDataResponse.getContentAsString()).isNotEmpty();
+    }
 
+    @Test
+    public void shouldReturnWeatherStatsNotFoundMessageWhenNoWeatherDataAvailableForGivenDateRange() throws Exception {
+
+        String startDateInString = "2024-02-11", endDateInString = "2025-02-12";
+
+        MockHttpServletResponse getFilterWeatherDataResponse = mvc.perform(
+                get(WEATHERS_ENDPOINT + TEMPERATURES_ENDPOINT)
+                        .param("start", startDateInString)
+                        .param("end", endDateInString))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(getFilterWeatherDataResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).isNotEmpty();
+        assertThat(getFilterWeatherDataResponse.getContentAsString()).contains(Constants.NO_DATA_FOR_GIVEN_DATE_RANGE);
     }
 
     @Test

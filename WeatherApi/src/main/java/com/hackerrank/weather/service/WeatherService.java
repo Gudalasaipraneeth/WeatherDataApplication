@@ -1,5 +1,6 @@
 package com.hackerrank.weather.service;
 
+import com.hackerrank.weather.dto.WeatherStats;
 import com.hackerrank.weather.exception.DuplicateWeatherDataException;
 import com.hackerrank.weather.exception.WeatherDataNotFoundException;
 import com.hackerrank.weather.model.Weather;
@@ -21,5 +22,5 @@ public interface WeatherService   {
     List<Weather> getAllWeatherDataForGivenLatitudeAndLongitude(Float  latitude, Float longitudde)
             throws WeatherDataNotFoundException;
 
-    List<Weather> getAllWeatherDataForGivenDateRange(Date startDate, Date endDate);
+    List<WeatherStats> getAllWeatherDataForGivenDateRange(Date startDate, Date endDate);
 }

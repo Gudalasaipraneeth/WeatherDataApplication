@@ -1,16 +1,20 @@
 package com.hackerrank.weather.service;
 
 import com.google.common.collect.Lists;
+import com.hackerrank.weather.dto.WeatherStats;
 import com.hackerrank.weather.exception.DuplicateWeatherDataException;
 import com.hackerrank.weather.exception.WeatherDataNotFoundException;
+import com.hackerrank.weather.model.Constants;
+import com.hackerrank.weather.model.Location;
 import com.hackerrank.weather.model.Weather;
 import com.hackerrank.weather.repository.WeatherRepository;
+import io.vavr.control.Either;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DefaultWeatherService implements WeatherService {
@@ -65,7 +69,59 @@ public class DefaultWeatherService implements WeatherService {
     }
 
     @Override
-    public List<Weather> getAllWeatherDataForGivenDateRange(Date startDate, Date endDate) {
-        return weatherRepository.findWeatherDataForGivenDateRange(startDate, endDate);
+    public List<WeatherStats> getAllWeatherDataForGivenDateRange(Date startDate, Date endDate) {
+        List<Weather> weatherDataForGivenDateRange = weatherRepository.findWeatherDataForGivenDateRange(startDate, endDate);
+        return getWeatherStats(weatherDataForGivenDateRange);
+    }
+
+    public List<WeatherStats> getWeatherStats(List<Weather> weatherDataList) {
+
+        Map<Location, WeatherStats> locationWiseTemperatureStats = new HashMap<>();
+
+        addEmptyWeatherStatsInMapIfThereIsNoWeatherData(weatherDataList, locationWiseTemperatureStats);
+
+        addWeatherDataIntoHMap(weatherDataList, locationWiseTemperatureStats);
+
+        return locationWiseTemperatureStats.entrySet()
+                .stream()
+                .map(Map.Entry::getValue).collect(Collectors.toList());
+
+    }
+
+    private void addWeatherDataIntoHMap(List<Weather> weatherDataList, Map<Location, WeatherStats> locationWiseTemperatureStats) {
+        weatherDataList.forEach(weather -> {
+
+            Location location = weather.getLocation();
+            WeatherStats weatherStats;
+            WeatherStats weatherStatsInHashmap = locationWiseTemperatureStats.get(location);
+            if (weatherStatsInHashmap != null) {
+                weatherStats = weatherStatsInHashmap;
+            } else {
+                weatherStats = new WeatherStats(location, Either.left(new DoubleSummaryStatistics()));
+            }
+
+            Float[] temperatureArray = weather.getTemperature_values_in_float();
+
+
+            if (temperatureArray != null && temperatureArray.length > 0) {
+                WeatherStats finalWeatherStats = weatherStats;
+                Arrays.stream(temperatureArray)
+                        .forEach(temperature -> finalWeatherStats
+                                .getTemperatureSummaryStatistics()
+                                .getLeft()
+                                .accept(temperature));
+            }
+
+            locationWiseTemperatureStats.put(location, weatherStats);
+
+        });
+    }
+
+    private void addEmptyWeatherStatsInMapIfThereIsNoWeatherData(List<Weather> weatherDataList, Map<Location, WeatherStats> locationWiseTemperatureStats) {
+        if (weatherDataList.isEmpty()) {
+            Location invalidLocation = new Location("NA", "NA", 0F, 0F);
+            WeatherStats emptyWeatherStats = new WeatherStats(invalidLocation, Either.right(Constants.NO_DATA_FOR_GIVEN_DATE_RANGE));
+            locationWiseTemperatureStats.put(invalidLocation, emptyWeatherStats);
+        }
     }
 }

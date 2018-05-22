@@ -18,6 +18,8 @@ import java.util.List;
 @RestController
 public class WeatherApiRestController {
 
+    private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+
     private WeatherService weatherService;
 
     @Autowired
@@ -58,8 +60,6 @@ public class WeatherApiRestController {
             @Valid @RequestParam("start") String startDate,
             @Valid @RequestParam("end") String endDate) throws ParseException {
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
-
         return weatherService.getAllWeatherDataForGivenDateRange(simpleDateFormat.parse(startDate),
                 simpleDateFormat.parse(endDate));
     }
@@ -80,7 +80,6 @@ public class WeatherApiRestController {
                                          @Valid @RequestParam("lon") float longitude
     ) throws ParseException {
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
 
         weatherService.eraseWeatherDataForGivenDateRangeAndLocation(simpleDateFormat.parse(startDate),
                 simpleDateFormat.parse(endDate), latitude, longitude);

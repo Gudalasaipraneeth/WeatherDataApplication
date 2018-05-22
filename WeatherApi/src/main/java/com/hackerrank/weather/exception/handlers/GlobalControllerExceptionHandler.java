@@ -9,7 +9,7 @@ import java.text.ParseException;
 
 @ControllerAdvice
 class GlobalControllerExceptionHandler {
-    @ResponseStatus(HttpStatus.BAD_REQUEST)  // 409
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Date is not valid yyyy-mm-dd format")  // 409
     @ExceptionHandler(ParseException.class)
     public void handleParseException() { }
 }

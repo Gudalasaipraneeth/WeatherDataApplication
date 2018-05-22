@@ -21,9 +21,11 @@ public class WeatherStats {
 
     private String failureMessage;
 
-    public WeatherStats() { }
+    public WeatherStats() {
+    }
 
-    public WeatherStats(Location location, Either<DoubleSummaryStatistics, String> temperatureSummaryStatistics) {
+    public WeatherStats(Location location,
+                        Either<DoubleSummaryStatistics, String> temperatureSummaryStatistics) {
         this.location = location;
         this.temperatureSummaryStatistics = temperatureSummaryStatistics;
     }
